@@ -1,6 +1,10 @@
 from modules.model.ChromaModel import ChromaModel
 from modules.modelSetup.BaseChromaSetup import BaseChromaSetup
+from modules.modelSetup.BaseModelSetup import BaseModelSetup
+from modules.util import factory
 from modules.util.config.TrainConfig import TrainConfig
+from modules.util.enum.ModelType import ModelType
+from modules.util.enum.TrainingMethod import TrainingMethod
 from modules.util.ModuleFilter import ModuleFilter
 from modules.util.NamedParameterGroup import NamedParameterGroupCollection
 from modules.util.optimizer_util import init_model_parameters
@@ -40,7 +44,7 @@ class ChromaFineTuneSetup(
                     "embeddings"
                 )
 
-        self._create_model_part_parameters(parameter_group_collection, "transformer", model.transformer, config.prior, freeze=ModuleFilter.create(config), debug=config.debug_mode)
+        self._create_model_part_parameters(parameter_group_collection, "transformer", model.transformer, config.transformer, freeze=ModuleFilter.create(config), debug=config.debug_mode)
 
         return parameter_group_collection
 
@@ -52,7 +56,7 @@ class ChromaFineTuneSetup(
         self._setup_embeddings_requires_grad(model, config)
 
         self._setup_model_part_requires_grad("text_encoder", model.text_encoder, config.text_encoder, model.train_progress)
-        self._setup_model_part_requires_grad("transformer", model.transformer, config.prior, model.train_progress)
+        self._setup_model_part_requires_grad("transformer", model.transformer, config.transformer, model.train_progress)
 
         model.vae.requires_grad_(False)
 
@@ -95,7 +99,7 @@ class ChromaFineTuneSetup(
 
         model.vae.eval()
 
-        if config.prior.train:
+        if config.transformer.train:
             model.transformer.train()
         else:
             model.transformer.eval()
@@ -111,3 +115,5 @@ class ChromaFineTuneSetup(
             if model.embedding_wrapper is not None:
                 model.embedding_wrapper.normalize_embeddings()
         self.__setup_requires_grad(model, config)
+
+factory.register(BaseModelSetup, ChromaFineTuneSetup, ModelType.CHROMA_1, TrainingMethod.FINE_TUNE)

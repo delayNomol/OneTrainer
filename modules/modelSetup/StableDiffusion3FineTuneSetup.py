@@ -1,6 +1,10 @@
 from modules.model.StableDiffusion3Model import StableDiffusion3Model
+from modules.modelSetup.BaseModelSetup import BaseModelSetup
 from modules.modelSetup.BaseStableDiffusion3Setup import BaseStableDiffusion3Setup
+from modules.util import factory
 from modules.util.config.TrainConfig import TrainConfig
+from modules.util.enum.ModelType import ModelType
+from modules.util.enum.TrainingMethod import TrainingMethod
 from modules.util.ModuleFilter import ModuleFilter
 from modules.util.NamedParameterGroup import NamedParameterGroupCollection
 from modules.util.optimizer_util import init_model_parameters
@@ -54,7 +58,7 @@ class StableDiffusion3FineTuneSetup(
                     "embeddings_3"
                 )
 
-        self._create_model_part_parameters(parameter_group_collection, "transformer", model.transformer, config.prior,
+        self._create_model_part_parameters(parameter_group_collection, "transformer", model.transformer, config.transformer,
                                            freeze=ModuleFilter.create(config), debug=config.debug_mode)
 
         return parameter_group_collection
@@ -69,7 +73,7 @@ class StableDiffusion3FineTuneSetup(
         self._setup_model_part_requires_grad("text_encoder_1", model.text_encoder_1, config.text_encoder, model.train_progress)
         self._setup_model_part_requires_grad("text_encoder_2", model.text_encoder_2, config.text_encoder_2, model.train_progress)
         self._setup_model_part_requires_grad("text_encoder_3", model.text_encoder_3, config.text_encoder_3, model.train_progress)
-        self._setup_model_part_requires_grad("transformer", model.transformer, config.prior, model.train_progress)
+        self._setup_model_part_requires_grad("transformer", model.transformer, config.transformer, model.train_progress)
 
         model.vae.requires_grad_(False)
 
@@ -139,7 +143,7 @@ class StableDiffusion3FineTuneSetup(
 
         model.vae.eval()
 
-        if config.prior.train:
+        if config.transformer.train:
             model.transformer.train()
         else:
             model.transformer.eval()
@@ -161,3 +165,6 @@ class StableDiffusion3FineTuneSetup(
             if model.embedding_wrapper_3 is not None:
                 model.embedding_wrapper_3.normalize_embeddings()
         self.__setup_requires_grad(model, config)
+
+factory.register(BaseModelSetup, StableDiffusion3FineTuneSetup, ModelType.STABLE_DIFFUSION_3, TrainingMethod.FINE_TUNE)
+factory.register(BaseModelSetup, StableDiffusion3FineTuneSetup, ModelType.STABLE_DIFFUSION_35, TrainingMethod.FINE_TUNE)

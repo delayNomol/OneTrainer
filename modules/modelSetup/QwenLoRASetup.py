@@ -1,7 +1,11 @@
 from modules.model.QwenModel import QwenModel
+from modules.modelSetup.BaseModelSetup import BaseModelSetup
 from modules.modelSetup.BaseQwenSetup import BaseQwenSetup
 from modules.module.LoRAModule import LoRAModuleWrapper
+from modules.util import factory
 from modules.util.config.TrainConfig import TrainConfig
+from modules.util.enum.ModelType import ModelType
+from modules.util.enum.TrainingMethod import TrainingMethod
 from modules.util.NamedParameterGroup import NamedParameterGroupCollection
 from modules.util.optimizer_util import init_model_parameters
 from modules.util.torch_util import state_dict_has_prefix
@@ -33,7 +37,7 @@ class QwenLoRASetup(
         parameter_group_collection = NamedParameterGroupCollection()
 
         self._create_model_part_parameters(parameter_group_collection, "text_encoder", model.text_encoder_lora, config.text_encoder)
-        self._create_model_part_parameters(parameter_group_collection, "transformer",  model.transformer_lora,  config.prior)
+        self._create_model_part_parameters(parameter_group_collection, "transformer",  model.transformer_lora,  config.transformer)
 
         if config.train_any_embedding() or config.train_any_output_embedding():
             raise NotImplementedError("Embeddings not implemented for Qwen")
@@ -51,7 +55,7 @@ class QwenLoRASetup(
         model.vae.requires_grad_(False)
 
         self._setup_model_part_requires_grad("text_encoder", model.text_encoder_lora, config.text_encoder, model.train_progress)
-        self._setup_model_part_requires_grad("transformer", model.transformer_lora, config.prior, model.train_progress)
+        self._setup_model_part_requires_grad("transformer", model.transformer_lora, config.transformer, model.train_progress)
 
     def setup_model(
             self,
@@ -110,7 +114,7 @@ class QwenLoRASetup(
 
         model.vae.eval()
 
-        if config.prior.train:
+        if config.transformer.train:
             model.transformer.train()
         else:
             model.transformer.eval()
@@ -122,3 +126,5 @@ class QwenLoRASetup(
             train_progress: TrainProgress
     ):
         self.__setup_requires_grad(model, config)
+
+factory.register(BaseModelSetup, QwenLoRASetup, ModelType.QWEN, TrainingMethod.LORA)

@@ -1,6 +1,8 @@
 import contextlib
 import copy
 import os
+import tkinter as tk
+import traceback
 
 from modules.model.BaseModel import BaseModel
 from modules.modelSampler.BaseModelSampler import (
@@ -122,10 +124,15 @@ class SampleWindow(ctk.CTkToplevel):
             else:
                 print("No backup found, loading without backup...")
 
+        if self.initial_train_config.quantization.cache_dir is None:
+            self.initial_train_config.quantization.cache_dir = self.initial_train_config.cache_dir + "/quantization"
+            os.makedirs(self.initial_train_config.quantization.cache_dir, exist_ok=True)
+
         model = model_loader.load(
             model_type=self.initial_train_config.model_type,
             model_names=model_names,
             weight_dtypes=self.initial_train_config.weight_dtypes(),
+            quantization=self.initial_train_config.quantization,
         )
         model.train_config = self.initial_train_config
 
@@ -198,18 +205,18 @@ class SampleWindow(ctk.CTkToplevel):
             )
 
     def destroy(self):
-        """Safely destroy the window"""
         try:
-            # Clear icon reference before destruction
             if hasattr(self, "_icon_image_ref"):
                 del self._icon_image_ref
 
             # Remove any pending after callbacks
             for after_id in self.tk.call('after', 'info'):
-                with contextlib.suppress(Exception):
+                with contextlib.suppress(tk.TclError, RuntimeError):
                     self.after_cancel(after_id)
 
-            # Call parent destroy
             super().destroy()
-        except Exception as e:
+        except (tk.TclError, RuntimeError) as e:
             print(f"Error destroying window: {e}")
+        except Exception as e:
+            print(f"Unexpected error destroying window: {e}")
+            traceback.print_exc()
