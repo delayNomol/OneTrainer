@@ -1,3 +1,28 @@
+OneTrainer zluda
+特别声明：
+由于lshqqytiger已经停止维护zluda版本的OneTrainer分支,而且Nerogar/OneTrainer的版本对zluda的适配并不好。
+此版使用lshqqytiger/OneTrainer为base并使用Nerogar/OneTrainer为upsetream合并代码，可以获得最新的Nerogar/OneTrainer同时支持zluda。
+目前使用amd rx 6800xt，rocm6.4.2，win11环境下可以正常训练Z-Image，其他未测试。
+
+使用方法：
+前置环境安装：
+a.Windows11，安装HIP 6.4.2 https://www.amd.com/en/developer/resources/rocm-hub/hip-sdk.html，（其他如果不支持HIP的老显卡，可能需要参考https://github.com/CS1o/Stable-Diffusion-Info/wiki/Lora-Trainer-Setup-Guides#amd-onetrainer-with-zluda，本人不做其他显卡测试）
+b.安装微软c++桌面开发套件，勾选win11 SDK（https://visualstudio.microsoft.com/zh-hant/visual-cpp-build-tools/）
+正式安装：
+1.git clone https://github.com/delayNomol/OneTrainer.git
+2.cd OneTrainer && py scripts/install_zluda.py
+3.运行 install.bat （确保脚本顺利完成，没有报错。如果报错请确保网络稳定正常，或者尝试删除venv重新运行install.bat）
+4.从win开始菜单搜索到[x64 Native Tools Command Prompt for VS 2022]并运行（至于为什么要这样启动，主要是应对兼容性问题，当然你也可以尝试直接运行，E:\OneTrainer\start-ui.bat）
+    输入如下前置命令，
+    chcp 65001
+    set TORCH_COMPILE_DISABLE=1
+    set TORCH_INDUCTOR_OFFLINE=1
+    E:\OneTrainer\start-ui.bat 
+5.等待OneTrainer启动即可。
+
+后续
+可能尝试升级zluda，尝试解决一些兼容性问题。
+
 # OneTrainer
 
 OneTrainer is a one-stop solution for all your Diffusion training needs.
