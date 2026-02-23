@@ -79,7 +79,7 @@ def install():
     commit = os.environ.get("ZLUDA_HASH", "5e717459179dc272b7d7d23391f0fad66c7459cf")
     if os.environ.get("ZLUDA_NIGHTLY", "0") == "1":
         platform = "nightly-" + platform
-    urllib.request.urlretrieve(f'https://github.com/lshqqytiger/ZLUDA/releases/download/rel.{commit}/ZLUDA-{platform}-rocm{ROCm.version[0]}-amd64.zip', '_zluda')
+    urllib.request.urlretrieve(f'https://github.com/lshqqytiger/ZLUDA/releases/download/rel.5e717459179dc272b7d7d23391f0fad66c7459cf/ZLUDA-windows-rocm6-amd64.zip', '_zluda')
     with zipfile.ZipFile('_zluda', 'r') as archive:
         infos = archive.infolist()
         for info in infos:
